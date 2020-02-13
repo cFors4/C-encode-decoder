@@ -49,7 +49,7 @@ int main(int argc, char **argv)
   free(wheel);
 
 
-  if (argv[3] = "C")
+  if (argv[3] == "C")
   {
     /*take string to be coded*/
     int *coded;
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 
 
 
-  if (argv[3] = "D")
+  if (argv[3] == "D")
   {
   /*take in numbers from argv[4] onwards to be decoded*/
 
