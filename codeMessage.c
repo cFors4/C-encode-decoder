@@ -18,57 +18,101 @@ struct Node *current = NULL;
 
 void getChars(char **s, char wheel_file[]);
 void createLinkedList(struct Node ** root, char wheelValues[]);
-void traverse(struct Node * root);
-void codeLetters(struct Node* root, char letters[], int **coded);
-
-
+void codeLetters(struct Node* root, char letters[], int **coded, int lenWheel);
+void decodeNumbers(struct Node* root, int numbers[], char **decoded, int len);
 
 int main(int argc, char **argv)
 {
+  /*List parameters from the inputs of argv*/
   printf("Parameter Listing\n");
-
   int i;
-
-  for (i = 1; i<argc; i++){
+  for (i = 1; i<argc; i++)
+  {
     printf("\t%d:%s\n",i,argv[i]);
   }
+
+  /*checking enough parameters*/
   if (argc<5)
   {
     printf ("Not enough arguments entered .\n ");
     exit (1);
   }
 
+  /*getting wheel characters from wheel file*/
   char *wheel_file = argv[1];
   char *wheel;
 
   getChars(&wheel, wheel_file);
   printf("Coding Wheel values:\n\t %s\n",wheel);
 
+  /*creating linked list from characters read in*/
   struct Node* root = NULL;
-  createLinkedList(&root,wheel);
+  createLinkedList(&root, wheel);
+
+  int lenWheel;
+  lenWheel = strlen(wheel);
+
+  /*free wheel to avoid memory leakage*/
   free(wheel);
 
-
-  if (argv[3] == "C")
+  /*checking mode coding or decoding*/
+  if (strcmp(argv[3],"C")==0)
   {
     /*take string to be coded*/
     int *coded;
+    int n;
+    char input[] = " ";
 
-    codeLetters(root,argv[4],&coded);
+    codeLetters(root, argv[4], &coded, lenWheel);
+
+
+    FILE *f = fopen(argv[2], "w");
+    for(n = 0; n<strlen(argv[4]);n++){
+      char buffer[5] = "hell";
+      sprintf(buffer,"%d",coded[n]);
+      printf("%s\n",buffer);
+      strncat(input, buffer, 1);
+      strncat(input, " ", 1);
+      printf("%s\n",input);
+
+    }
+    fwrite(input, sizeof(char), sizeof(strlen(argv[4])), f);
+    fclose(f);
+
     free(coded);
   }
 
 
 
-  if (argv[3] == "D")
+  if (strcmp(argv[3],"D")==0)
   {
-  /*take in numbers from argv[4] onwards to be decoded*/
+    /*take in numbers from argv[4] onwards to be decoded*/
+    char *decoded;
+    int n;
 
+    int size = argc - 4 ;
+    int* numbers  = (int*)calloc( size, sizeof(int));
 
+    for( n = 0; n < size; n++){
+      sscanf( argv[n + 4], "%d", &numbers[n]);
+    }
+    decodeNumbers(root, numbers, &decoded, size);
 
+    FILE *f = fopen(argv[2], "w");
+    fwrite(decoded, sizeof(char), sizeof(decoded), f);
+    fclose(f);
+
+    free(decoded);
   }
+
+
+
   /*store in file argv[2]*/
+  return 0;
 }
+
+
+
 void getChars(char **str ,char wheel_file[])
 {
   FILE * fp;
@@ -83,7 +127,7 @@ void getChars(char **str ,char wheel_file[])
       exit (1);
     }
 
-  while((ch = fgetc(fp)) != EOF)
+  while( (ch = fgetc(fp)) != EOF)
   {
     if(ch == '\n')
       size ++;
@@ -138,30 +182,18 @@ void createLinkedList(struct Node** root, char wheel_values[]){
     (*root) -> prev = new_node;
 
     new_node -> prev = end;
+    new_node -> next = (*root);
 
     end -> next = new_node;
     }
   }
 }
 
-void traverse(struct Node* root){
-  struct Node *trav = root;
-  struct Node *end  = root -> prev;
-
-  while (trav != end )
-  {
-    printf("traversing %c\n",trav->data);
-    trav = trav -> next;
-  }
-  printf("traversing %c\n",trav->data);
-}
 
 
-
-void codeLetters(struct Node* root, char letters[], int **coded){
+void codeLetters(struct Node* root, char letters[], int **coded, int lenWheel){
   struct Node *current = root;
   int i;
-  struct Node *end     = root -> prev;
 
   if (!(*coded = (int *)malloc(sizeof(int)*strlen(letters))))
   {
@@ -173,18 +205,64 @@ void codeLetters(struct Node* root, char letters[], int **coded){
   {
     int move = 0;
     printf("looking for %c from current %c\n",letters[i],current -> data);
-    while(current != end)
+
+    while (move<lenWheel)
     {
-      move++;
       if(current -> data == letters[i])
-      {
-        printf("%c%d\n",current->data,i);
         break;
-      }
+
       else
       {
       current = current -> next;
+      move++;
       }
     }
+    if(move>((strlen(letters)/2)))
+      move = move - lenWheel;
+
+    printf("it took %d move\n",move);
+    coded[0][i] = move;
+    printf("%dwow\n",coded[0][i]);
   }
 }
+
+
+void decodeNumbers(struct Node* root, int numbers[], char **decoded, int len){
+  struct Node *current = root;
+  int i;
+
+  printf("%d len\n",len);
+  if (!(*decoded = (char *)malloc(sizeof(char)*len)))
+  {
+    printf("Out of memory");
+    exit(1);
+  }
+
+
+
+  for(i = 0; i<len; i++)
+  {
+
+    int moves = numbers[i];
+    while(moves != 0)
+    {
+      printf("%d moves left on %d\n",moves,numbers[i]);
+
+      if (moves<0)
+      {
+        current = current -> prev;
+
+        moves++;
+      }
+      else
+      {
+        printf("going to letter %c\n",current -> next -> data);
+        current = current -> next;
+        moves--;
+      }
+    }
+    printf("%c added to decoded\n",current->data);
+    decoded[0][i] = current -> data;
+  }
+}
+

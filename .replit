@@ -1,2 +1,3 @@
-run = language = "c"
-run = "gcc -ansi -Wall codeMessage.c -o codeMessage && ./codeMessage exampleWheel.txt codeMessage.txt C "AFE" && rm codeMessage" 
+language = "c"
+run = "gcc -ansi -Wall codeMessage.c -o codeMessage && ./codeMessage exampleWheel.txt codeMessage.txt C AFE && rm codeMessage" 
+
