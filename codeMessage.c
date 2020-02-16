@@ -71,7 +71,7 @@ int main(int argc, char **argv)
     decodeNumbers(root, numbers, &decoded, size);
 
     FILE *f = fopen(argv[2], "w");
-    fwrite(decoded, sizeof(char), sizeof(decoded), f);
+    fwrite(decoded, sizeof(char), size, f);
     fclose(f);
 
     free(decoded);
