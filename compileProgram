@@ -1,0 +1,2 @@
+gcc -ansi -Wall -c codeMessage.c -o codeMessage.o
+gcc codeMessage.o -o codeMessage
