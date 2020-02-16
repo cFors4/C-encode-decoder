@@ -13,8 +13,6 @@ struct Node *next;
 struct Node *prev;
 };
 
-struct Node *current = NULL;
-
 /*function blueprints*/
 
 void getChars(char **s, char wheel_file[]);
